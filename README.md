@@ -5,7 +5,7 @@
 ## Usage
 
 ```
-$ npm install --save minitrue
+$ npm install --save prolefeed
 ```
 
 ### API
@@ -81,8 +81,7 @@ Prolefeed is a Newspeak term in the novel *Nineteen Eighty-Four* written by Geor
 
 The proles are analogous to React Components.
 
-Sources: 
-- https://en.wikipedia.org/wiki/Ministry_of_Truth 
+Sources:
 - https://en.wikipedia.org/wiki/Prolefeed
 
 ## License
