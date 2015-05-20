@@ -1,0 +1,46 @@
+{
+  "name": "prolefeed",
+  "version": "0.0.0",
+  "description": "Observable Providence cursors",
+  "main": "modules/index.js",
+  "scripts": {
+    "test": "mocha --compilers js:babel/register",
+    "build": "./scripts/build.sh",
+    "prepublish": "npm run build"
+  },
+  "author": {
+    "name": "Alberto Leal",
+    "email": "mailforalberto@gmail.com",
+    "url": "github.com/Dashed"
+  },
+  "repository": "dashed/prolefeed",
+  "license": "MIT",
+  "files": [
+    "modules"
+  ],
+  "keywords": [
+    "cursor",
+    "immutable",
+    "providence",
+    "structure",
+    "data",
+    "datastructure",
+    "events",
+    "observe",
+    "subscribe",
+    "once",
+    "on",
+    "prolefeed"
+  ],
+  "peerDependencies": {
+    "immutable": "3.x"
+  },
+  "devDependencies": {
+    "babel": "^5.4.4",
+    "chai": "^2.3.0",
+    "mocha": "^2.2.5"
+  },
+  "dependencies": {
+    "providence": "^0.1.1"
+  }
+}
