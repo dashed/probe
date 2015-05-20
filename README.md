@@ -1,4 +1,4 @@
-# prolefeed
+# prolefeed [![Build Status](https://travis-ci.org/Dashed/prolefeed.svg)](https://travis-ci.org/Dashed/prolefeed)
 
 > `Prolefeed` extends Providence to add observation capabilities.
 
