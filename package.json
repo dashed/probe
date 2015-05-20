@@ -1,6 +1,6 @@
 {
   "name": "prolefeed",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Observable Providence cursors",
   "main": "modules/index.js",
   "scripts": {
