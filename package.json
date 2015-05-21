@@ -1,5 +1,5 @@
 {
-  "name": "prolefeed",
+  "name": "probe",
   "version": "0.1.3",
   "description": "Observable Providence cursors",
   "main": "modules/index.js",
@@ -13,7 +13,7 @@
     "email": "mailforalberto@gmail.com",
     "url": "github.com/Dashed"
   },
-  "repository": "dashed/prolefeed",
+  "repository": "dashed/probe",
   "license": "MIT",
   "files": [
     "modules"
@@ -30,7 +30,7 @@
     "subscribe",
     "once",
     "on",
-    "prolefeed"
+    "probe"
   ],
   "peerDependencies": {
     "immutable": "3.x"

@@ -4,10 +4,10 @@ const expect = chai.expect;
 const Immutable = require('immutable');
 const { Map } = Immutable;
 
-const Prolefeed = require('../src');
+const Probe = require('../src');
 const Providence = require('providence');
 
-describe('Prolefeed', function() {
+describe('Probe', function() {
 
     let options;
 
@@ -19,14 +19,14 @@ describe('Prolefeed', function() {
         };
     });
 
-    it('should be instance of Providence and Prolefeed', function() {
-        const cursor = new Prolefeed(options);
-        expect(cursor instanceof Prolefeed).to.be.true;
+    it('should be instance of Providence and Probe', function() {
+        const cursor = new Probe(options);
+        expect(cursor instanceof Probe).to.be.true;
         expect(cursor instanceof Providence).to.be.true;
     });
 
     it('should install _onUpdate', function() {
-        const cursor = new Prolefeed(options);
+        const cursor = new Probe(options);
         const _options = cursor.options();
         const _onUpdate = _options.get('_onUpdate');
         expect(_onUpdate).to.be.a('function');
@@ -34,7 +34,7 @@ describe('Prolefeed', function() {
 
     it('should call observing function on update', function() {
         let calls = 0;
-        const cursor = new Prolefeed(options);
+        const cursor = new Probe(options);
         const ret = cursor.observe(function() {
             calls++;
         });
@@ -58,7 +58,7 @@ describe('Prolefeed', function() {
                 }
             });
 
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
             const cursorZ = cursorY.cursor('z');
@@ -124,7 +124,7 @@ describe('Prolefeed', function() {
                 foo2: 'foo2',
                 foo3: 'foo3'
             } } } } });
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
 
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
@@ -342,7 +342,7 @@ describe('Prolefeed', function() {
                     b: 'b'
                 }
             } } } } });
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
 
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
@@ -543,7 +543,7 @@ describe('Prolefeed', function() {
             let badCalls = 0;
             options.root.data = Immutable.fromJS({ x: { y: { z: { subtree: {
             } } } } });
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
 
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
@@ -746,7 +746,7 @@ describe('Prolefeed', function() {
                     b: 'b'
                 }
             } } } } });
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
 
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
@@ -942,7 +942,7 @@ describe('Prolefeed', function() {
                 }
             });
 
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
             const cursorZ = cursorY.cursor('z');
@@ -1007,7 +1007,7 @@ describe('Prolefeed', function() {
                 }
             });
 
-            const cursor = new Prolefeed(options);
+            const cursor = new Probe(options);
             const cursorX = cursor.cursor(['x']);
             const cursorY = cursorX.cursor('y');
             const cursorZ = cursorY.cursor('z');

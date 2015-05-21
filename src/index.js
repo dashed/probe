@@ -16,20 +16,20 @@ const LISTENERS_PATH = [LISTENERS];
 const KEYPATH_PATH = ['keyPath'];
 const _ONUPDATE_PATH = ['_onUpdate']; // internal _onUpdate
 
-module.exports = Prolefeed;
+module.exports = Probe;
 
-function makeProlefeed(...args) {
-    return new Prolefeed(...args);
+function makeProbe(...args) {
+    return new Probe(...args);
 }
 
 /**
- * Prolefeed constructor with the same argument input as the Prolefeed constructor.
+ * Probe constructor with the same argument input as the Probe constructor.
  */
-function Prolefeed() {
+function Probe() {
 
     // TODO: add test case for this
-    if(!(this instanceof Prolefeed)) {
-        return makeProlefeed.apply(null, arguments);
+    if(!(this instanceof Probe)) {
+        return makeProbe.apply(null, arguments);
     }
 
     Providence.apply(this, arguments);
@@ -47,7 +47,7 @@ function Prolefeed() {
     }
 
     if(!options.hasIn(LISTENERS_PATH)) {
-        // a reference plain object is used so that it is shared among all Prolefeed
+        // a reference plain object is used so that it is shared among all Probe
         // objects that inherit it.
         this._options = options.setIn(LISTENERS_PATH, {
             data: Immutable.Map()
@@ -55,32 +55,32 @@ function Prolefeed() {
     }
 }
 
-let ProlefeedPrototype = Object.create(Providence.prototype);
-Prolefeed.prototype = ProlefeedPrototype;
+let ProbePrototype = Object.create(Providence.prototype);
+Probe.prototype = ProbePrototype;
 
-ProlefeedPrototype.constructor = Prolefeed;
+ProbePrototype.constructor = Probe;
 
 /**
- * Add observer/listener to listen for changes at this Prolefeed object's keypath.
+ * Add observer/listener to listen for changes at this Probe object's keypath.
  * Be aware that observation isn't scoped to the root data.
  *
  * listener function would be added to a lookup table that is shared among all
- * Prolefeed objects that inherit it.
+ * Probe objects that inherit it.
  *
  * @param  {Function} listener
  * @return {Function}          Returns unobserve function.
  */
-ProlefeedPrototype.observe = function(listener) {
+ProbePrototype.observe = function(listener) {
     return this.on('any', listener);
 }
 
 /**
- * Remove observer at this Prolefeed object's keypath.
+ * Remove observer at this Probe object's keypath.
  *
  * @param  {Function} listener
  * @return {Bool}          Returns true if unobserve is successful; false otherwise.
  */
-ProlefeedPrototype.unobserve = function(listener) {
+ProbePrototype.unobserve = function(listener) {
     return this.removeListener('any', listener);
 }
 /**
@@ -89,7 +89,7 @@ ProlefeedPrototype.unobserve = function(listener) {
  * event may be one of: any, update, swap, add, remove, delete
  *
  * listener function would be added to a lookup table that is shared among all
- * Prolefeed objects that inherit it.
+ * Probe objects that inherit it.
  *
  * @param  {String} event
  * @param  {Function} listener
@@ -97,7 +97,7 @@ ProlefeedPrototype.unobserve = function(listener) {
  *                             most once; since it's associated with .on(), which
  *                             was called.
  */
-ProlefeedPrototype.on = function(event, listener) {
+ProbePrototype.on = function(event, listener) {
     const listenerKey = fetchListenerKey(event);
     const options = this._options;
 
@@ -134,7 +134,7 @@ ProlefeedPrototype.on = function(event, listener) {
  *                             unsubcribe function will be defunct; and calling it
  *                             has no effect.
  */
-ProlefeedPrototype.once = function(event, listener) {
+ProbePrototype.once = function(event, listener) {
     let unsubscribe;
     let executed = false;
 
@@ -160,9 +160,9 @@ ProlefeedPrototype.once = function(event, listener) {
  *
  * @param  {String} event
  * @param  {[type]} listener
- * @return {Prolefeed}
+ * @return {Probe}
  */
-ProlefeedPrototype.removeListener = function(event, listener) {
+ProbePrototype.removeListener = function(event, listener) {
     const listenerKey = fetchListenerKey(event);
     deletePathListeners.call(this, [listenerKey, listener]);
     return this;
@@ -176,9 +176,9 @@ ProlefeedPrototype.removeListener = function(event, listener) {
  * Returns this for chaining.
  *
  * @param  {String} event
- * @return {Prolefeed}
+ * @return {Probe}
  */
-ProlefeedPrototype.removeListeners = function(event) {
+ProbePrototype.removeListeners = function(event) {
     const listenerKey = fetchListenerKey(event);
     deletePathListeners.call(this, [listenerKey]);
     return this;
