@@ -2,7 +2,7 @@ const Immutable = require('immutable');
 const { Iterable } = Immutable;
 const Providence = require('providence');
 
-const { newKeyPath } = Providence.prototype.__utils;
+const { newPath } = Providence.prototype.__utils;
 
 /* constants */
 // sentinel values
@@ -13,7 +13,7 @@ const LISTENERS_DELETED = {};
 const LISTENERS_ADDED = {};
 
 const LISTENERS_PATH = [LISTENERS];
-const KEYPATH_PATH = ['keyPath'];
+const PATH_PATH = ['path'];
 const _ONUPDATE_PATH = ['_onUpdate']; // internal _onUpdate
 
 module.exports = Probe;
@@ -38,9 +38,10 @@ function Probe() {
 
     if(!options.hasIn(_ONUPDATE_PATH)) {
 
-        const _onUpdate = function(options, keyPath, newRoot, oldRoot) {
+        const _onUpdate = function(options, path, newRoot, oldRoot) {
             // TODO: add test case for propagate
-            notifyListeners(options, keyPath, newRoot, oldRoot, options.get('propagate', true));
+            // note: path has been sliced
+            notifyListeners(options, path, newRoot, oldRoot, options.get('propagate', true));
         };
 
         this._options = options = options.setIn(_ONUPDATE_PATH, _onUpdate);
@@ -61,7 +62,7 @@ Probe.prototype = ProbePrototype;
 ProbePrototype.constructor = Probe;
 
 /**
- * Add observer/listener to listen for changes at this Probe object's keypath.
+ * Add observer/listener to listen for changes at this Probe object's path.
  * Be aware that observation isn't scoped to the root data.
  *
  * listener function would be added to a lookup table that is shared among all
@@ -75,7 +76,7 @@ ProbePrototype.observe = function(listener) {
 }
 
 /**
- * Remove observer at this Probe object's keypath.
+ * Remove observer at this Probe object's path.
  *
  * @param  {Function} listener
  * @return {Bool}          Returns true if unobserve is successful; false otherwise.
@@ -84,7 +85,7 @@ ProbePrototype.unobserve = function(listener) {
     return this.removeListener('any', listener);
 }
 /**
- * Add listener that'll be called whenever event occurs at keypath.
+ * Add listener that'll be called whenever event occurs at path.
  *
  * event may be one of: any, update, swap, add, remove, delete
  *
@@ -104,12 +105,12 @@ ProbePrototype.on = function(event, listener) {
     // unbox listeners
     const boxed = options.getIn(LISTENERS_PATH);
     const listeners = boxed.data;
-    const keyPath = options.getIn(KEYPATH_PATH);
+    const path = options.getIn(PATH_PATH);
 
-    const listenerKeyPath = newKeyPath(keyPath, [listenerKey, listener]);
+    const listenerPath = newPath(path, [listenerKey, listener]);
 
-    if(!listeners.hasIn(listenerKeyPath)) {
-        boxed.data = listeners.setIn(listenerKeyPath, listener);
+    if(!listeners.hasIn(listenerPath)) {
+        boxed.data = listeners.setIn(listenerPath, listener);
     }
 
     let unsubbed = false;
@@ -151,7 +152,7 @@ ProbePrototype.once = function(event, listener) {
 
 /**
  * Remove listener, if it exists, from event.
- * If the same listener is observing another event at the same keypath, that
+ * If the same listener is observing another event at the same path, that
  * listener will not be removed.
  *
  * event may be one of: any, update, swap, add, remove, delete
@@ -192,11 +193,11 @@ function deletePathListeners(pathToDelete) {
     // unbox listeners
     const boxed = options.getIn(LISTENERS_PATH);
     const listeners = boxed.data;
-    const keyPath = options.getIn(KEYPATH_PATH);
+    const path = options.getIn(PATH_PATH);
 
-    const listenerKeyPath = newKeyPath(keyPath, pathToDelete);
+    const listenerPath = newPath(path, pathToDelete);
 
-    boxed.data = listeners.deleteIn(listenerKeyPath);
+    boxed.data = listeners.deleteIn(listenerPath);
 }
 
 function fetchListenerKey(event) {
@@ -260,7 +261,7 @@ function callListeners(observers, currentNew, currentOld) {
     callObservers(observersAny, observers, args);
 }
 
-function notifyListeners(options, keyPath, newRoot, oldRoot, propagate = true) {
+function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
 
     // fetch listeners
     const boxed = options.getIn(LISTENERS_PATH);
@@ -270,9 +271,9 @@ function notifyListeners(options, keyPath, newRoot, oldRoot, propagate = true) {
     let currentNew = newRoot;
     let currentOld = oldRoot;
     let n = 0;
-    let len = keyPath.length;
+    let len = path.length;
 
-    // notify listeners for every subpath of keyPath
+    // notify listeners for every subpath of path
     //
     // invariant:
     // current !== NOT_SET  => there are listeners in current and subtrees of current
@@ -283,7 +284,7 @@ function notifyListeners(options, keyPath, newRoot, oldRoot, propagate = true) {
             callListeners(extractListeners(current), currentNew, currentOld);
         }
 
-        const atom = keyPath[n++];
+        const atom = path[n++];
         current = current.get(atom, NOT_SET);
         currentNew = currentNew === NOT_SET ? NOT_SET : currentNew.get(atom, NOT_SET);
         currentOld = currentOld === NOT_SET ? NOT_SET : currentOld.get(atom, NOT_SET);
