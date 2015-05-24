@@ -238,13 +238,13 @@ function callObservers(ctxObservers, observers, args) {
     });
 }
 
-function callListeners(observers, currentNew, currentOld) {
+function callListeners(observers, currentNew, currentOld, pathToChange = void 0) {
 
     const newSet = currentNew !== NOT_SET;
     const oldSet = currentOld !== NOT_SET;
     const __currentNew = newSet ? currentNew : void 0;
     const __currentOld = oldSet ? currentOld : void 0;
-    const args = [__currentNew, __currentOld];
+    const args = [__currentNew, __currentOld, pathToChange];
     const {
         observersAny,
         observersAdd,
@@ -272,6 +272,7 @@ function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
     let currentOld = oldRoot;
     let n = 0;
     let len = path.length;
+    let pathToChange = path.slice();
 
     // notify listeners for every subpath of path
     //
@@ -281,10 +282,11 @@ function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
     while(current !== NOT_SET && currentOld !== currentNew && n < len) {
 
         if(propagate) {
-            callListeners(extractListeners(current), currentNew, currentOld);
+            callListeners(extractListeners(current), currentNew, currentOld, pathToChange);
         }
 
         const atom = path[n++];
+        pathToChange.shift();
         current = current.get(atom, NOT_SET);
         currentNew = currentNew === NOT_SET ? NOT_SET : currentNew.get(atom, NOT_SET);
         currentOld = currentOld === NOT_SET ? NOT_SET : currentOld.get(atom, NOT_SET);
