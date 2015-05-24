@@ -1,6 +1,6 @@
 {
   "name": "probe",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "Observable Providence cursors",
   "main": "modules/index.js",
   "scripts": {
