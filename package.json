@@ -41,6 +41,6 @@
     "mocha": "^2.2.5"
   },
   "dependencies": {
-    "providence": "^0.5.1"
+    "providence": "^0.6.0"
   }
 }
