@@ -39,8 +39,14 @@ function Probe() {
     if(!options.hasIn(_ONUPDATE_PATH)) {
 
         const _onUpdate = function(options, path, newRoot, oldRoot) {
+
+            // TODO: add test case for this
+            if(!options.get('notifyListeners', true)) {
+                return;
+            }
+
             // TODO: add test case for propagate
-            // note: path has been sliced
+            // note: path has been sliced by caller
             notifyListeners(options, path, newRoot, oldRoot, options.get('propagate', true));
         };
 
