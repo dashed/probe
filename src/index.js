@@ -244,13 +244,12 @@ function callObservers(ctxObservers, observers, args) {
     });
 }
 
-function callListeners(observers, currentNew, currentOld, pathToChange = void 0) {
+function callListeners(observers, currentNew, currentOld, pathOriginChange = []) {
 
     const newSet = currentNew !== NOT_SET;
     const oldSet = currentOld !== NOT_SET;
     const __currentNew = newSet ? currentNew : void 0;
     const __currentOld = oldSet ? currentOld : void 0;
-    const args = [__currentNew, __currentOld, pathToChange];
     const {
         observersAny,
         observersAdd,
@@ -258,13 +257,13 @@ function callListeners(observers, currentNew, currentOld, pathToChange = void 0)
         observersDelete } = observers;
 
     if(oldSet && newSet) {
-        callObservers(observersUpdate, observers, args);
+        callObservers(observersUpdate, observers, [__currentNew, __currentOld, pathOriginChange.slice()]);
     } else if(!oldSet && newSet) {
-        callObservers(observersAdd, observers, args);
+        callObservers(observersAdd, observers, [__currentNew, pathOriginChange.slice()]);
     } else if(oldSet && !newSet) {
-        callObservers(observersDelete, observers, args);
+        callObservers(observersDelete, observers, [__currentOld, pathOriginChange.slice()]);
     }
-    callObservers(observersAny, observers, args);
+    callObservers(observersAny, observers, [__currentNew, __currentOld, pathOriginChange.slice()]);
 }
 
 function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
@@ -278,7 +277,7 @@ function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
     let currentOld = oldRoot;
     let n = 0;
     let len = path.length;
-    let pathToChange = path.slice();
+    const pathOriginChange = path;
 
     // notify listeners for every subpath of path
     //
@@ -288,17 +287,16 @@ function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
     while(current !== NOT_SET && currentOld !== currentNew && n < len) {
 
         if(propagate) {
-            callListeners(extractListeners(current), currentNew, currentOld, pathToChange);
+            callListeners(extractListeners(current), currentNew, currentOld, pathOriginChange);
         }
 
         const atom = path[n++];
-        pathToChange.shift();
         current = current.get(atom, NOT_SET);
         currentNew = currentNew === NOT_SET ? NOT_SET : currentNew.get(atom, NOT_SET);
         currentOld = currentOld === NOT_SET ? NOT_SET : currentOld.get(atom, NOT_SET);
     }
 
-    return __notifyListeners(current, currentNew, currentOld, propagate);
+    return __notifyListeners(current, currentNew, currentOld, pathOriginChange, propagate);
 }
 
 /**
@@ -310,17 +308,18 @@ function notifyListeners(options, path, newRoot, oldRoot, propagate = true) {
  * @param  {Immutable Map|Object}  listeners  [description]
  * @param  {any}  currentNew [description]
  * @param  {any}  currentOld [description]
+ * @param  {Array}  pathOriginChange [description]
  * @param  {Boolean} propagate  [description]
  */
 // TODO: refactor listeners.forEach as abstracted function
-function __notifyListeners(listeners, currentNew, currentOld, propagate = true) {
+function __notifyListeners(listeners, currentNew, currentOld, pathOriginChange, propagate = true) {
 
     if(currentOld === currentNew || listeners === NOT_SET) {
         return;
     }
 
     let observers = extractListeners(listeners);
-    callListeners(observers, currentNew, currentOld);
+    callListeners(observers, currentNew, currentOld, pathOriginChange);
     const listenersSize = listeners.size - observers.count;
 
     if(!propagate || listenersSize <= 0) {
@@ -350,7 +349,7 @@ function __notifyListeners(listeners, currentNew, currentOld, propagate = true) 
 
                 const __currentNew = isNew ? value : NOT_SET;
                 const __currentOld = isOld ? value : NOT_SET;
-                __notifyListeners(subListeners, __currentNew, __currentOld);
+                __notifyListeners(subListeners, __currentNew, __currentOld, pathOriginChange);
             });
             return;
         }
@@ -363,7 +362,7 @@ function __notifyListeners(listeners, currentNew, currentOld, propagate = true) 
 
             const __currentNew = isNew ? tree.get(key, NOT_SET) : NOT_SET;
             const __currentOld = isOld ? tree.get(key, NOT_SET) : NOT_SET;
-            __notifyListeners(subListeners, __currentNew, __currentOld);
+            __notifyListeners(subListeners, __currentNew, __currentOld, pathOriginChange);
         });
         return;
     }
@@ -389,7 +388,7 @@ function __notifyListeners(listeners, currentNew, currentOld, propagate = true) 
 
             const __currentNew = currentNew.get(key, NOT_SET);
             const __currentOld = currentOld.get(key, NOT_SET);
-            __notifyListeners(subListeners, __currentNew, __currentOld);
+            __notifyListeners(subListeners, __currentNew, __currentOld, pathOriginChange);
         });
         return;
     }
@@ -401,7 +400,7 @@ function __notifyListeners(listeners, currentNew, currentOld, propagate = true) 
         }
 
         const __currentOld = currentOld.get(key, NOT_SET);
-        __notifyListeners(subListeners, __currentNew, __currentOld);
+        __notifyListeners(subListeners, __currentNew, __currentOld, pathOriginChange);
     });
 
     currentOld.forEach(function(__currentOld, key) {
@@ -414,7 +413,7 @@ function __notifyListeners(listeners, currentNew, currentOld, propagate = true) 
         if(subListeners === NOT_SET) {
             return;
         }
-        __notifyListeners(subListeners, __currentNew, __currentOld);
+        __notifyListeners(subListeners, __currentNew, __currentOld, pathOriginChange);
     });
 
     // NOTE: refactored into above code to reduce number of iterations on number of keys
@@ -427,7 +426,7 @@ function __notifyListeners(listeners, currentNew, currentOld, propagate = true) 
 
     //     const __currentNew = currentNew.get(key, NOT_SET);
     //     const __currentOld = currentOld.get(key, NOT_SET);
-    //     __notifyListeners(subListeners, __currentNew, __currentOld);
+    //     __notifyListeners(subListeners, __currentNew, __currentOld, pathOriginChange);
     // });
 }
 
