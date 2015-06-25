@@ -41,6 +41,7 @@ function Probe() {
         const _onUpdate = function(options, path, newRoot, oldRoot) {
 
             // TODO: add test case for this
+            // prevents any listeners from propagating
             if(!options.get('notifyListeners', true)) {
                 return;
             }
@@ -93,7 +94,7 @@ ProbePrototype.unobserve = function(listener) {
 /**
  * Add listener that'll be called whenever event occurs at path.
  *
- * event may be one of: any, update, swap, add, remove, delete
+ * event may be one of: any, update, add, remove, delete
  *
  * listener function would be added to a lookup table that is shared among all
  * Probe objects that inherit it.
@@ -131,7 +132,7 @@ ProbePrototype.on = function(event, listener) {
 /**
  * Add a listener that's only called once when event occurs.
  *
- * event may be one of: any, update, swap, add, remove, delete
+ * event may be one of: any, update, add, remove, delete
  *
  * @param  {String} event
  * @param  {Function} listener
@@ -161,7 +162,7 @@ ProbePrototype.once = function(event, listener) {
  * If the same listener is observing another event at the same path, that
  * listener will not be removed.
  *
- * event may be one of: any, update, swap, add, remove, delete
+ * event may be one of: any, update, add, remove, delete
  *
  * Returns this for chaining.
  *
@@ -178,7 +179,7 @@ ProbePrototype.removeListener = function(event, listener) {
 /**
  * Remove all listeners, if any, from event.
  *
- * event may be one of: any, update, swap, add, remove, delete
+ * event may be one of: any, update, add, remove, delete
  *
  * Returns this for chaining.
  *
@@ -216,7 +217,6 @@ function fetchListenerKey(event) {
             listenerKey = LISTENERS;
             break;
         case 'update':
-        case 'swap':
             listenerKey = LISTENERS_UPDATED;
             break;
         case 'add':
@@ -227,7 +227,7 @@ function fetchListenerKey(event) {
             listenerKey = LISTENERS_DELETED;
             break;
         default:
-            throw Error(`Invalid event: ${event}. Must be one of: any, update, swap, add, delete`);
+            throw Error(`Invalid event: ${event}. Must be one of: any, update, add, delete`);
             break;
     }
     return listenerKey;

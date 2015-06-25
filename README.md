@@ -35,7 +35,7 @@ Shorthand for `Probe.prototype.removeListener('any', listener)`
 
 Add `listener` that'll be called whenever relevant event occurs at keypath.
 
-`event` may be one of: any, update, swap, add, remove, delete
+`event` may be one of: any, update, add, remove, delete
 
 `listener` function would be added to a lookup table that is shared among all
 Probe objects that inherit it.
@@ -48,7 +48,7 @@ since it's associated with `.on()`, which was called.
 
 Add a `listener` that's only called once when event occurs.
 
-`event` may be one of: any, update, swap, add, remove, delete
+`event` may be one of: any, update, add, remove, delete
 
 Return `unsubcribe` function that may be called at most once; 
 since it's associated with `.on()`, which was called. Once listener has been called, 
@@ -61,7 +61,7 @@ Remove `listener`, if it exists, from `event`.
 If the same listener is observing another `event` at the same keypath, that
 listener will not be removed.
 
-`event` may be one of: any, update, swap, add, remove, delete
+`event` may be one of: any, update, add, remove, delete
 
 Returns `this` for chaining.
 
@@ -69,7 +69,7 @@ Returns `this` for chaining.
 
 Remove all listeners, if any, from event.
 
-`event` may be one of: any, update, swap, add, remove, delete
+`event` may be one of: any, update, add, remove, delete
 
 Returns `this` for chaining.
 
