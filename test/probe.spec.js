@@ -64,7 +64,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { z: 'bar' } } });
                 expect(oldValue.toJS()).to.eql({ x: { y: { z: 'foo' } } });
                 expect(path).to.eql(['x', 'y']);
@@ -75,7 +78,10 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { z: 'bar' } });
                 expect(oldValue.toJS()).to.eql({ y: { z: 'foo' } });
                 expect(path).to.eql(['x', 'y']);
@@ -86,7 +92,10 @@ describe('Probe', function() {
             });
 
             // current tree observe
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ z: 'bar' });
                 expect(oldValue.toJS()).to.eql({ z: 'foo' });
                 expect(path).to.eql(['x', 'y']);
@@ -104,7 +113,10 @@ describe('Probe', function() {
             }
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue).to.equal('bar');
                 expect(oldValue).to.equal('foo');
                 expect(path).to.eql(['x', 'y']);
@@ -135,7 +147,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { z: { subtree: {
                     foo: {
                         a: 'a'
@@ -161,7 +176,10 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { z: { subtree: {
                     foo: {
                         a: 'a'
@@ -187,7 +205,10 @@ describe('Probe', function() {
             });
 
             // current tree observe
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ z: { subtree: {
                     foo: {
                         a: 'a'
@@ -213,7 +234,10 @@ describe('Probe', function() {
             });
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ subtree: {
                     foo: {
                         a: 'a'
@@ -248,7 +272,10 @@ describe('Probe', function() {
             }
 
             // subtree observe
-            expectedCalls += captureEmit(subtree, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({
                     foo: {
                         a: 'a'
@@ -275,10 +302,23 @@ describe('Probe', function() {
 
             // case 1: The number of children at [x, y, z, subtree, foo] in newRoot shall be the same
             // as the number of children at [x, y, z, subtree, foo] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'add'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'add'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'add':
+                        [newValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(oldValue).to.equal(void 0);
+                        break;
+                }
                 expect(newValue).to.equal('a');
-                expect(oldValue).to.equal(void 0);
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo', 'a']), ['update', 'remove', 'delete'], function() {
@@ -287,10 +327,23 @@ describe('Probe', function() {
 
             // case 2: The number of children at [x, y, z, subtree, foo2] in newRoot shall be less
             // than the number of children at [x, y, z, subtree, foo2] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'add'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'add'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'add':
+                        [newValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(oldValue).to.equal(void 0);
+                        break;
+                }
                 expect(newValue).to.equal('a');
-                expect(oldValue).to.equal(void 0);
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo2', 'a']), ['update', 'remove', 'delete'], function() {
@@ -303,10 +356,23 @@ describe('Probe', function() {
 
             // case 3: The number of children at [x, y, z, subtree, foo3] in newRoot shall be more
             // than the number of children at [x, y, z, subtree, foo3] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'add'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'add'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'add':
+                        [newValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(oldValue).to.equal(void 0);
+                        break;
+                }
                 expect(newValue).to.equal('a');
-                expect(oldValue).to.equal(void 0);
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo3', 'a']), ['update', 'remove', 'delete'], function() {
@@ -361,7 +427,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { z: { subtree: {
                     foo: 'foo',
                     foo2: 'foo2',
@@ -387,7 +456,10 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { z: { subtree: {
                     foo: 'foo',
                     foo2: 'foo2',
@@ -405,7 +477,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 } } } });
-                expect(path).to.eql(['y']);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorX, ['add', 'remove', 'delete'], function() {
@@ -413,7 +485,10 @@ describe('Probe', function() {
             });
 
             // current tree observe
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ z: { subtree: {
                     foo: 'foo',
                     foo2: 'foo2',
@@ -431,7 +506,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 } } });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql([ 'x', 'y' ]);
                 calls++;
             });
             captureEmit(cursorY, ['add', 'remove', 'delete'], function() {
@@ -439,7 +514,10 @@ describe('Probe', function() {
             });
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ subtree: {
                     foo: 'foo',
                     foo2: 'foo2',
@@ -457,7 +535,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 } });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql([ 'x', 'y' ]);
                 calls++;
             });
             captureEmit(cursorZ, ['add', 'remove', 'delete'], function() {
@@ -474,7 +552,10 @@ describe('Probe', function() {
             }
 
             // subtree observe
-            expectedCalls += captureEmit(subtree, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({
                     foo: 'foo',
                     foo2: 'foo2',
@@ -492,7 +573,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql([ 'x', 'y' ]);
                 calls++;
             });
             captureEmit(subtree, ['add', 'remove', 'delete'], function() {
@@ -501,10 +582,24 @@ describe('Probe', function() {
 
             // case 1: The number of children at [x, y, z, subtree, foo] in oldRoot shall be the same
             // as the number of children at [x, y, z, subtree, foo] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'delete':
+                    case 'remove':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(newValue).to.equal(void 0);
+                        expect(args.length).to.equal(3);
+                        break;
+                }
                 expect(oldValue).to.equal('a');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql([ 'x', 'y' ]);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo', 'a']), ['update', 'add'], function() {
@@ -513,10 +608,24 @@ describe('Probe', function() {
 
             // case 2: The number of children at [x, y, z, subtree, foo2] in oldRoot shall be less
             // than the number of children at [x, y, z, subtree, foo2] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'delete':
+                    case 'remove':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(newValue).to.equal(void 0);
+                        expect(args.length).to.equal(3);
+                        break;
+                }
                 expect(oldValue).to.equal('a');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql([ 'x', 'y' ]);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo2', 'a']), ['update', 'add'], function() {
@@ -529,10 +638,24 @@ describe('Probe', function() {
 
             // case 3: The number of children at [x, y, z, subtree, foo3] in oldRoot shall be more
             // than the number of children at [x, y, z, subtree, foo3] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'delete':
+                    case 'remove':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(newValue).to.equal(void 0);
+                        expect(args.length).to.equal(3);
+                        break;
+                }
                 expect(oldValue).to.equal('a');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql([ 'x', 'y' ]);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo3', 'a']), ['update', 'add'], function() {
@@ -570,7 +693,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { z: { subtree: {
                     foo: {
                         a: 'a'
@@ -593,7 +719,10 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { z: { subtree: {
                     foo: {
                         a: 'a'
@@ -608,7 +737,7 @@ describe('Probe', function() {
                 } } } });
                 expect(oldValue.toJS()).to.eql({ y: { z: { subtree: {
                 } } } });
-                expect(path).to.eql(['y']);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorX, ['add', 'remove', 'delete'], function() {
@@ -616,7 +745,10 @@ describe('Probe', function() {
             });
 
             // current tree observe
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ z: { subtree: {
                     foo: {
                         a: 'a'
@@ -631,7 +763,7 @@ describe('Probe', function() {
                 } } });
                 expect(oldValue.toJS()).to.eql({ z: { subtree: {
                 } } });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorY, ['add', 'remove', 'delete'], function() {
@@ -639,7 +771,10 @@ describe('Probe', function() {
             });
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ subtree: {
                     foo: {
                         a: 'a'
@@ -654,7 +789,7 @@ describe('Probe', function() {
                 } });
                 expect(oldValue.toJS()).to.eql({ subtree: {
                 } });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorZ, ['add', 'remove', 'delete'], function() {
@@ -671,7 +806,10 @@ describe('Probe', function() {
             }
 
             // subtree observe
-            expectedCalls += captureEmit(subtree, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({
                     foo: {
                         a: 'a'
@@ -686,7 +824,7 @@ describe('Probe', function() {
                 });
                 expect(oldValue.toJS()).to.eql({
                 });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree, ['add', 'remove', 'delete'], function() {
@@ -695,10 +833,23 @@ describe('Probe', function() {
 
             // case 1: The number of children at [x, y, z, subtree, foo] in newRoot shall be the same
             // as the number of children at [x, y, z, subtree, foo] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'add'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'add'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'add':
+                        [newValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(oldValue).to.equal(void 0);
+                        break;
+                }
                 expect(newValue).to.equal('a');
-                expect(oldValue).to.equal(void 0);
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo', 'a']), ['update', 'remove', 'delete'], function() {
@@ -707,10 +858,23 @@ describe('Probe', function() {
 
             // case 2: The number of children at [x, y, z, subtree, foo2] in newRoot shall be less
             // than the number of children at [x, y, z, subtree, foo2] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'add'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'add'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'add':
+                        [newValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(oldValue).to.equal(void 0);
+                        break;
+                }
                 expect(newValue).to.equal('a');
-                expect(oldValue).to.equal(void 0);
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo2', 'a']), ['update', 'remove', 'delete'], function() {
@@ -723,10 +887,23 @@ describe('Probe', function() {
 
             // case 3: The number of children at [x, y, z, subtree, foo3] in newRoot shall be more
             // than the number of children at [x, y, z, subtree, foo3] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'add'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'add'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'add':
+                        [newValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(oldValue).to.equal(void 0);
+                        break;
+                }
                 expect(newValue).to.equal('a');
-                expect(oldValue).to.equal(void 0);
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo3', 'a']), ['update', 'remove', 'delete'], function() {
@@ -781,7 +958,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { z: { subtree: {
                 } } } } });
                 expect(oldValue.toJS()).to.eql({ x: { y: { z: { subtree: {
@@ -804,7 +984,10 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { z: { subtree: {
                 } } } });
                 expect(oldValue.toJS()).to.eql({ y: { z: { subtree: {
@@ -819,7 +1002,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 } } } });
-                expect(path).to.eql(['y']);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorX, ['add', 'remove', 'delete'], function() {
@@ -827,7 +1010,10 @@ describe('Probe', function() {
             });
 
             // current tree observe
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ z: { subtree: {
                 } } });
                 expect(oldValue.toJS()).to.eql({ z: { subtree: {
@@ -842,7 +1028,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 } } });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorY, ['add', 'remove', 'delete'], function() {
@@ -850,7 +1036,10 @@ describe('Probe', function() {
             });
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorZ, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ subtree: {
                 } });
                 expect(oldValue.toJS()).to.eql({ subtree: {
@@ -865,7 +1054,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 } });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(cursorZ, ['add', 'remove', 'delete'], function() {
@@ -882,7 +1071,10 @@ describe('Probe', function() {
             }
 
             // subtree observe
-            expectedCalls += captureEmit(subtree, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(subtree, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({
                 });
                 expect(oldValue.toJS()).to.eql({
@@ -897,7 +1089,7 @@ describe('Probe', function() {
                         b: 'b'
                     }
                 });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree, ['add', 'remove', 'delete'], function() {
@@ -906,10 +1098,24 @@ describe('Probe', function() {
 
             // case 1: The number of children at [x, y, z, subtree, foo] in oldRoot shall be the same
             // as the number of children at [x, y, z, subtree, foo] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(subtree.cursor(['foo', 'a']), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'delete':
+                    case 'remove':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(newValue).to.equal(void 0);
+                        break;
+                }
                 expect(oldValue).to.equal('a');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo', 'a']), ['update', 'add'], function() {
@@ -918,10 +1124,24 @@ describe('Probe', function() {
 
             // case 2: The number of children at [x, y, z, subtree, foo2] in oldRoot shall be less
             // than the number of children at [x, y, z, subtree, foo2] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(subtree.cursor(['foo2', 'a']), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'delete':
+                    case 'remove':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(newValue).to.equal(void 0);
+                        break;
+                }
                 expect(oldValue).to.equal('a');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo2', 'a']), ['update', 'add'], function() {
@@ -934,10 +1154,24 @@ describe('Probe', function() {
 
             // case 3: The number of children at [x, y, z, subtree, foo3] in oldRoot shall be more
             // than the number of children at [x, y, z, subtree, foo3] for the listener map.
-            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(subtree.cursor(['foo3', 'a']), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'delete':
+                    case 'remove':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(newValue).to.equal(void 0);
+                        break;
+                }
                 expect(oldValue).to.equal('a');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y']);
                 calls++;
             });
             captureEmit(subtree.cursor(['foo3', 'a']), ['update', 'add'], function() {
@@ -984,7 +1218,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { } } });
                 expect(oldValue.toJS()).to.eql({ x: { y: { z: 'foo' } } });
                 expect(path).to.eql(['x', 'y', 'z']);
@@ -995,20 +1232,26 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { } });
                 expect(oldValue.toJS()).to.eql({ y: { z: 'foo' } });
-                expect(path).to.eql(['y', 'z']);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorX, ['add', 'remove', 'delete'], function() {
                 badCalls++;
             });
 
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ });
                 expect(oldValue.toJS()).to.eql({ z: 'foo' });
-                expect(path).to.eql(['z']);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorY, ['add', 'remove', 'delete'], function() {
@@ -1016,10 +1259,24 @@ describe('Probe', function() {
             });
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(cursorZ, ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'remove':
+                    case 'delete':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(newValue).to.equal(void 0);
+                        break;
+                }
                 expect(oldValue).to.equal('foo');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorZ, ['add', 'update'], function() {
@@ -1053,7 +1310,10 @@ describe('Probe', function() {
             const cursorZ = cursorY.cursor('z');
 
             // subpath observe
-            expectedCalls += captureEmit(cursor, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursor, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ x: { y: { } } });
                 expect(oldValue.toJS()).to.eql({ x: { y: { z: {
                     foo: 'foo',
@@ -1067,26 +1327,32 @@ describe('Probe', function() {
             });
 
             // subpath observe
-            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorX, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ y: { } });
                 expect(oldValue.toJS()).to.eql({ y: { z: {
                     foo: 'foo',
                     foo2: 'foo2'
                 } } });
-                expect(path).to.eql(['y', 'z']);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorX, ['add', 'remove', 'delete'], function() {
                 badCalls++;
             });
 
-            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(newValue, oldValue, path) {
+            expectedCalls += captureEmit(cursorY, ['any', 'update'], function(event, args) {
+
+                const [newValue, oldValue, path] = args;
+
                 expect(newValue.toJS()).to.eql({ });
                 expect(oldValue.toJS()).to.eql({ z: {
                     foo: 'foo',
                     foo2: 'foo2'
                 } });
-                expect(path).to.eql(['z']);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorY, ['add', 'remove', 'delete'], function() {
@@ -1094,13 +1360,27 @@ describe('Probe', function() {
             });
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ, ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(cursorZ, ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'remove':
+                    case 'delete':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(newValue).to.equal(void 0);
+                        break;
+                }
                 expect(oldValue.toJS()).to.eql({
                     foo: 'foo',
                     foo2: 'foo2'
                 });
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorZ, ['add', 'update'], function() {
@@ -1115,10 +1395,24 @@ describe('Probe', function() {
             }
 
             // subtree observe
-            expectedCalls += captureEmit(cursorZ.cursor('foo'), ['any', 'remove', 'delete'], function(newValue, oldValue, path) {
-                expect(newValue).to.equal(void 0);
+            expectedCalls += captureEmit(cursorZ.cursor('foo'), ['any', 'remove', 'delete'], function(event, args) {
+
+                let newValue, oldValue, path;
+
+                switch(event) {
+                    case 'remove':
+                    case 'delete':
+                        [oldValue, path] = args;
+                        expect(args.length).to.equal(2);
+                        break;
+                    case 'any':
+                        [newValue, oldValue, path] = args;
+                        expect(args.length).to.equal(3);
+                        expect(newValue).to.equal(void 0);
+                        break;
+                }
                 expect(oldValue).to.equal('foo');
-                expect(path).to.equal(void 0);
+                expect(path).to.eql(['x', 'y', 'z']);
                 calls++;
             });
             captureEmit(cursorZ.cursor('foo'), ['add', 'update'], function() {
@@ -1136,19 +1430,19 @@ describe('Probe', function() {
 function captureEmit(cursor, events, fn) {
     let subscriptions = 0;
 
-
-
     for(const event of events) {
 
-        const fnWrap = function(...args) {
+        // expect this to be a function to unsubscribe
+        expect(cursor.on(event, function(...args) {
             fn.call(null, event, args);
-        }
-
-        expect(cursor.on(event, fnWrap)).to.be.a('function');
+        })).to.be.a('function');
         subscriptions++;
 
         if(event == 'any') {
-            expect(cursor.observe(fnWrap)).to.be.a('function');
+            // expect this to be a function to unsubscribe
+            expect(cursor.observe(function(...args) {
+                fn.call(null, event, args);
+            })).to.be.a('function');
             subscriptions++;
         }
     }
