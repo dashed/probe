@@ -1,6 +1,6 @@
 # probe [![Build Status](https://travis-ci.org/Dashed/probe.svg)](https://travis-ci.org/Dashed/probe)
 
-> `Probe` extends Providence to add observation capabilities.
+> `Probe` extends [Providence](https://github.com/dashed/providence) to add observation capabilities.
 
 ## Usage
 
@@ -8,70 +8,88 @@
 $ npm install --save probe
 ```
 
+## Why?
+
+It's usually useful to attach an observer to a `path`, and call it whenever a change at the subset or superset of `path` occurs.
+
 ### API
 
 ### `Probe`
 
-`Probe` extends `Providence` constructor. See relevant `Providence` API docs: https://github.com/dashed/providence
+`Probe` extends [`Providence`](https://github.com/dashed/providence) constructor, and will have `Providence` API. See relevant `Providence` API docs: https://github.com/dashed/providence
 
 ### `Probe.prototype.observe(listener)`
 
-Add `listener` to listen for any changes at this Probe object's keypath.
-Be aware that observation isn't scoped to the root data; only at keypath.
+- Add the function `listener` to listen for any changes at this Probe object's path (e.g. `probe.path()`).
 
-`listener` function would be added to a lookup table that is shared among all
-Probe objects that inherit it.
+- Be aware that observation isn't scoped to the root data; only at path.
 
-Shorthand for `Probe.prototype.on('any', listener)`
+- The `listener` function would be added to an internal lookup table that is shared among all Probe objects that inherit it.
+
+- The `listener` function will be invoked with three arguments: `(newValue, oldValue, pathOriginChange)`
+
+- Adding the same `listener` two or more times doesn't do anything. 
+
+- Returns `unsubcribe` function that may be called at most once.
+
+**NOTE:** Shorthand for `Probe.prototype.on('any', listener)`
 
 ### `Probe.prototype.unobserve(listener)`
 
-Remove observer at this Probe object's keypath.
+- Removes observer, `listener`, if it exists, at this Probe object's path.
 
-Shorthand for `Probe.prototype.removeListener('any', listener)`
+- Returns `this` for chaining.
+
+**NOTE:** Shorthand for `Probe.prototype.removeListener('any', listener)`
 
 
 ### `Probe.prototype.on(event, listener)`
 
-Add `listener` that'll be called whenever relevant event occurs at keypath.
+- Add `listener` that'll be called whenever relevant `event` occurs at path  (e.g. `probe.path()`)..
 
-`event` may be one of: any, update, swap, add, remove, delete
+- `event` may be one of: `any`, `update`, `add`, `remove`, or `delete`
 
-`listener` function would be added to a lookup table that is shared among all
-Probe objects that inherit it.
+- The `listener` function will be invoked with at most three arguments depending on the `event` subscribed:
+    - `any` event: `(newValue, oldValue, pathOriginChange)`
+    - `add` event: `(newValue, pathOriginChange)`
+    - `remove` event: `(oldValue, pathOriginChange)`
+    - `delete` event is alias of `remove` event
 
-Return `unsubcribe` function that may be called at most once; 
+- `pathOriginChange` is the path of the origin probe object that made the change. This is always relative to root.
+
+- `listener` function would be added to a lookup table that is shared among all Probe objects that inherit it.
+
+- Adding the same `listener` two or more times doesn't do anything. 
+
+- Returns `unsubcribe` function that may be called at most once; 
 since it's associated with `.on()`, which was called.
 
 
 ### `Probe.prototype.once(event, listener)`
 
-Add a `listener` that's only called once when event occurs.
+- Same semantics as `Probe.prototype.on(event, listener)`, except `listener` is only called at most once when `event` occurs at path  (e.g. `probe.path()`).
 
-`event` may be one of: any, update, swap, add, remove, delete
-
-Return `unsubcribe` function that may be called at most once; 
-since it's associated with `.on()`, which was called. Once listener has been called, 
-the `unsubcribe` function will be defunct; and calling it has no effect.
+- Returns `unsubcribe` function that may be called at most once; 
+since it's associated with `.once()`, which was called. Once listener has been called, calling the `unsubcribe` function has no effect.
 
 
 ### `Probe.prototype.removeListener(event, listener)`
 
-Remove `listener`, if it exists, from `event`.
-If the same listener is observing another `event` at the same keypath, that
-listener will not be removed.
+- Removes `listener`, if it exists, from `event`.
 
-`event` may be one of: any, update, swap, add, remove, delete
+- If the same `listener` is observing another `event` at the same keypath, that listener will not be removed.
 
-Returns `this` for chaining.
+- `event` may be one of: `any`, `update`, `add`, `remove`, or `delete`
+
+- Returns `this` for chaining.
 
 ### `Probe.prototype.removeListeners()`
 
-Remove all listeners, if any, from event.
+- Remove any and all listeners from `event`.
 
-`event` may be one of: any, update, swap, add, remove, delete
+- `event` may be one of: `any`, `update`, `add`, `remove`, or `delete`
 
-Returns `this` for chaining.
+- Returns `this` for chaining.
 
 ## License
 
