@@ -1,5 +1,7 @@
 # probe [![Build Status](https://travis-ci.org/Dashed/probe.svg)](https://travis-ci.org/Dashed/probe)
 
+#  (DEPRECATED/UNMAINTAINED)
+
 > `Probe` extends [Providence](https://github.com/dashed/providence) to add observation capabilities.
 
 ## Usage
@@ -28,7 +30,7 @@ It's usually useful to attach an observer to a `path`, and call it whenever a ch
 
 - The `listener` function will be invoked with three arguments: `(newValue, oldValue, pathOriginChange)`
 
-- Adding the same `listener` two or more times doesn't do anything. 
+- Adding the same `listener` two or more times doesn't do anything.
 
 - Returns `unsubcribe` function that may be called at most once.
 
@@ -59,9 +61,9 @@ It's usually useful to attach an observer to a `path`, and call it whenever a ch
 
 - `listener` function would be added to a lookup table that is shared among all Probe objects that inherit it.
 
-- Adding the same `listener` two or more times doesn't do anything. 
+- Adding the same `listener` two or more times doesn't do anything.
 
-- Returns `unsubcribe` function that may be called at most once; 
+- Returns `unsubcribe` function that may be called at most once;
 since it's associated with `.on()`, which was called.
 
 
@@ -69,7 +71,7 @@ since it's associated with `.on()`, which was called.
 
 - Same semantics as `Probe.prototype.on(event, listener)`, except `listener` is only called at most once when `event` occurs at path  (e.g. `probe.path()`).
 
-- Returns `unsubcribe` function that may be called at most once; 
+- Returns `unsubcribe` function that may be called at most once;
 since it's associated with `.once()`, which was called. Once listener has been called, calling the `unsubcribe` function has no effect.
 
 
